@@ -3,18 +3,18 @@ use std::ops::DerefMut as _;
 pub trait RcRefCellCallbackExt<T> {
     fn strong_await_queue<F, C>(&self, future: F, callback: C)
     where
-        F: std::future::Future + 'static,
-        C: FnMut(&mut T, F::Output) + 'static;
+        F: Future + 'static,
+        C: FnOnce(&mut T, F::Output) + 'static;
     fn strong_queue<C>(&self, callback: C)
     where
         C: FnMut(&mut T) + 'static;
 }
 
 impl<T: 'static> RcRefCellCallbackExt<T> for std::rc::Rc<std::cell::RefCell<T>> {
-    fn strong_await_queue<F, C>(&self, future: F, mut callback: C)
+    fn strong_await_queue<F, C>(&self, future: F, callback: C)
     where
-        F: std::future::Future + 'static,
-        C: FnMut(&mut T, F::Output) + 'static,
+        F: Future + 'static,
+        C: FnOnce(&mut T, F::Output) + 'static,
     {
         let strong = self.clone();
         wasm_bindgen_futures::spawn_local(async move {
@@ -22,10 +22,9 @@ impl<T: 'static> RcRefCellCallbackExt<T> for std::rc::Rc<std::cell::RefCell<T>> 
             rc_ref_cell_try_run(&strong, |r| callback(r, output))
         })
     }
-
-    fn strong_queue<C>(&self, mut callback: C)
+    fn strong_queue<C>(&self, callback: C)
     where
-        C: FnMut(&mut T) + 'static,
+        C: FnOnce(&mut T) + 'static,
     {
         self.strong_await_queue(async {}, move |r, ()| callback(r))
     }
@@ -34,11 +33,11 @@ impl<T: 'static> RcRefCellCallbackExt<T> for std::rc::Rc<std::cell::RefCell<T>> 
 pub trait WeakRcRefCellCallbackExt<T> {
     fn await_queue<F, C>(&self, future: F, callback: C)
     where
-        F: std::future::Future + 'static,
-        C: FnMut(&mut T, F::Output) + 'static;
+        F: Future + 'static,
+        C: FnOnce(&mut T, F::Output) + 'static;
     fn queue<C>(&self, callback: C)
     where
-        C: FnMut(&mut T) + 'static;
+        C: FnOnce(&mut T) + 'static;
     fn callback<C>(&self, callback: C) -> Box<dyn Fn()>
     where
         C: FnMut(&mut T) + 'static;
@@ -47,15 +46,15 @@ pub trait WeakRcRefCellCallbackExt<T> {
 impl<T: 'static> WeakRcRefCellCallbackExt<T> for std::rc::Rc<std::cell::RefCell<T>> {
     fn await_queue<F, C>(&self, future: F, callback: C)
     where
-        F: std::future::Future + 'static,
-        C: FnMut(&mut T, F::Output) + 'static,
+        F: Future + 'static,
+        C: FnOnce(&mut T, F::Output) + 'static,
     {
         std::rc::Rc::downgrade(self).await_queue(future, callback)
     }
 
     fn queue<C>(&self, callback: C)
     where
-        C: FnMut(&mut T) + 'static,
+        C: FnOnce(&mut T) + 'static,
     {
         std::rc::Rc::downgrade(self).queue(callback)
     }
@@ -69,10 +68,10 @@ impl<T: 'static> WeakRcRefCellCallbackExt<T> for std::rc::Rc<std::cell::RefCell<
 }
 
 impl<T: 'static> WeakRcRefCellCallbackExt<T> for std::rc::Weak<std::cell::RefCell<T>> {
-    fn await_queue<F, C>(&self, future: F, mut callback: C)
+    fn await_queue<F, C>(&self, future: F, callback: C)
     where
-        F: std::future::Future + 'static,
-        C: FnMut(&mut T, F::Output) + 'static,
+        F: Future + 'static,
+        C: FnOnce(&mut T, F::Output) + 'static,
     {
         let weak = self.clone();
         wasm_bindgen_futures::spawn_local(async move {
@@ -81,9 +80,9 @@ impl<T: 'static> WeakRcRefCellCallbackExt<T> for std::rc::Weak<std::cell::RefCel
         })
     }
 
-    fn queue<C>(&self, mut callback: C)
+    fn queue<C>(&self, callback: C)
     where
-        C: FnMut(&mut T) + 'static,
+        C: FnOnce(&mut T) + 'static,
     {
         self.await_queue(async {}, move |r, ()| callback(r))
     }
