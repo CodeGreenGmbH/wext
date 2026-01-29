@@ -14,9 +14,9 @@ pub mod prelude {
     pub use crate::element::ElementExt as _;
     pub use crate::event_listener::EventListenerExt as _;
     pub use crate::event_listener::WeakRcRefCellEventListenerExt as _;
+    pub use crate::html::HtmlElementExt as _;
     pub use crate::html::create_ext::*;
     pub use crate::html::input::HtmlInputExt as _;
-    pub use crate::html::HtmlElementExt as _;
     pub use crate::node::NodeExt as _;
     pub use crate::svg::SvgElementExt as _;
     pub use crate::text::TextExt as _;
