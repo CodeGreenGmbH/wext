@@ -1,3 +1,5 @@
+use crate::dom_ref::DomRef;
+
 pub trait NodeExt: AsRef<web_sys::Node> + Clone {
     /// shorthand for `self.append_child(&child).unwrap()`
     fn child(&self, child: &web_sys::Node) -> Self {
@@ -27,6 +29,10 @@ pub trait NodeExt: AsRef<web_sys::Node> + Clone {
     {
         self.replace(new.as_ref());
         std::mem::replace(self, new)
+    }
+
+    fn dom_ref(&self) -> DomRef<Self> {
+        DomRef::new(self)
     }
 }
 

@@ -1,4 +1,5 @@
 pub mod callback;
+pub mod dom_ref;
 pub mod element;
 pub(crate) mod element_macros;
 pub mod event_listener;
